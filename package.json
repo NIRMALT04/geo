@@ -1,0 +1,43 @@
+{
+  "name": "multimodal-eo-analysis",
+  "version": "1.0.0",
+  "description": "Multimodal AI system for Earth Observation satellite imagery analysis with GPT-OSS integration",
+  "main": "index.js",
+  "scripts": {
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "build": "npm run build:frontend && npm run build:backend",
+    "build:frontend": "cd frontend && npm run build",
+    "build:backend": "cd backend && npm run build",
+    "start": "npm run start:backend",
+    "start:backend": "cd backend && npm start",
+    "test": "npm run test:backend && npm run test:frontend",
+    "test:backend": "cd backend && npm test",
+    "test:frontend": "cd frontend && npm test",
+    "docker:build": "docker-compose build",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down"
+  },
+  "keywords": [
+    "earth-observation",
+    "satellite-imagery",
+    "multimodal-ai",
+    "gpt-oss",
+    "vision-transformer",
+    "geospatial",
+    "three.js",
+    "react"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.0"
+  },
+  "workspaces": [
+    "frontend",
+    "backend",
+    "ai-models",
+    "data-processing"
+  ]
+}

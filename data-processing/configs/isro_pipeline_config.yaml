@@ -1,0 +1,121 @@
+# ISRO EO Data Pipeline Configuration
+
+# Data source configuration
+isro_base_url: "https://bhuvan-app1.nrsc.gov.in/data"
+bhuvan_api_key: null  # Set via environment variable
+
+# Processing parameters
+target_crs: "EPSG:4326"
+target_resolution: [512, 512]
+resampling_method: "bilinear"
+compression: "lzw"
+
+# Filtering criteria
+max_cloud_cover: 30.0
+min_date: "2020-01-01"
+max_date: "2024-12-31"
+
+# Spatial bounds (India)
+spatial_bounds:
+  min_lon: 68.0
+  min_lat: 6.0
+  max_lon: 98.0
+  max_lat: 38.0
+
+# Output paths
+raw_data_path: "./data/raw"
+processed_data_path: "./data/processed"
+metadata_path: "./data/metadata"
+annotations_path: "./data/annotations"
+
+# Processing options
+parallel_downloads: 4
+chunk_size: 8192
+retry_attempts: 3
+timeout: 300
+
+# Satellite priorities (higher number = higher priority)
+satellite_priorities:
+  ResourceSat-2A: 10
+  ResourceSat-2: 9
+  Cartosat-2S: 8
+  Cartosat-2: 7
+  IRS-P6: 6
+  
+# Sensor configurations
+sensor_configs:
+  LISS-IV:
+    spatial_resolution: 5.8
+    spectral_bands: ["B2", "B3", "B4", "B5"]  # Green, Red, NIR, SWIR
+    band_descriptions:
+      B2: "Green (0.52-0.59 μm)"
+      B3: "Red (0.62-0.68 μm)" 
+      B4: "Near Infrared (0.77-0.86 μm)"
+      B5: "Short Wave Infrared (1.55-1.70 μm)"
+    
+  LISS-III:
+    spatial_resolution: 23.5
+    spectral_bands: ["B2", "B3", "B4", "B5"]
+    band_descriptions:
+      B2: "Green (0.52-0.59 μm)"
+      B3: "Red (0.62-0.68 μm)"
+      B4: "Near Infrared (0.77-0.86 μm)"
+      B5: "Short Wave Infrared (1.55-1.70 μm)"
+      
+  AWiFS:
+    spatial_resolution: 56.0
+    spectral_bands: ["B2", "B3", "B4", "B5"]
+    band_descriptions:
+      B2: "Green (0.52-0.59 μm)"
+      B3: "Red (0.62-0.68 μm)"
+      B4: "Near Infrared (0.77-0.86 μm)"
+      B5: "Short Wave Infrared (1.55-1.70 μm)"
+
+# Land cover classification
+land_cover_classes:
+  water:
+    color: "#0077be"
+    description: "Water bodies including rivers, lakes, and oceans"
+  forest:
+    color: "#228b22"
+    description: "Dense forest and woodland areas"
+  agriculture:
+    color: "#ffd700"
+    description: "Agricultural fields and farmland"
+  urban:
+    color: "#ff4500"
+    description: "Built-up areas and infrastructure"
+  barren:
+    color: "#daa520"
+    description: "Barren land and sparse vegetation"
+  grassland:
+    color: "#9acd32"
+    description: "Grassland and pasture areas"
+  snow:
+    color: "#ffffff"
+    description: "Snow and ice covered areas"
+  wetland:
+    color: "#4682b4"
+    description: "Wetlands and marshy areas"
+
+# Quality control thresholds
+quality_control:
+  min_valid_pixels: 0.7  # Minimum fraction of valid (non-cloud) pixels
+  max_saturation: 0.05   # Maximum fraction of saturated pixels
+  min_contrast: 0.1      # Minimum image contrast
+  geometric_accuracy: 30.0  # Maximum geometric error in meters
+
+# Annotation generation
+annotation_settings:
+  generate_captions: true
+  caption_max_length: 200
+  include_coordinates: true
+  include_temporal_info: true
+  include_spectral_info: true
+  
+# Performance settings
+performance:
+  max_memory_gb: 16
+  use_gpu: true
+  gpu_memory_fraction: 0.8
+  num_workers: 4

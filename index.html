@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EO Analysis - Multimodal Earth Observation System</title>
+    <style>
+        body { 
+            margin: 0; 
+            font-family: 'Inter', system-ui, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #0f172a 100%);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 2rem;
+            box-sizing: border-box;
+        }
+        .container {
+            text-align: center;
+            max-width: 800px;
+        }
+        .logo {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 2rem;
+            background: linear-gradient(45deg, #3b82f6, #8b5cf6);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+        }
+        .title {
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, #3b82f6, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .subtitle {
+            font-size: 1.25rem;
+            color: #94a3b8;
+            margin-bottom: 3rem;
+            line-height: 1.6;
+        }
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+        .feature {
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 1rem;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+        }
+        .feature h3 {
+            color: #3b82f6;
+            margin-bottom: 1rem;
+        }
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .btn-primary {
+            background: linear-gradient(45deg, #3b82f6, #8b5cf6);
+            color: white;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+        }
+        .btn-secondary {
+            background: rgba(30, 41, 59, 0.5);
+            color: #94a3b8;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+        .btn-secondary:hover {
+            background: rgba(59, 130, 246, 0.1);
+            color: white;
+        }
+        .legacy-note {
+            margin-top: 3rem;
+            padding: 1rem;
+            background: rgba(251, 191, 36, 0.1);
+            border: 1px solid rgba(251, 191, 36, 0.3);
+            border-radius: 0.5rem;
+            color: #fbbf24;
+            font-size: 0.9rem;
+        }
+        @media (max-width: 768px) {
+            .title { font-size: 2rem; }
+            .features { grid-template-columns: 1fr; }
+            .cta-buttons { flex-direction: column; align-items: center; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">🛰️</div>
+        <h1 class="title">EO Analysis System</h1>
+        <p class="subtitle">
+            Advanced multimodal Earth observation analysis with AI-powered insights, 
+            featuring GPT-OSS integration and interactive 3D visualization
+        </p>
+        
+        <div class="features">
+            <div class="feature">
+                <h3>🤖 AI-Powered Analysis</h3>
+                <p>CLIP & BLIP vision encoders with GPT-OSS alignment for multimodal understanding</p>
+            </div>
+            <div class="feature">
+                <h3>🛰️ ISRO Data Integration</h3>
+                <p>Automated processing of satellite imagery from Bhuvan and NRSC datasets</p>
+            </div>
+            <div class="feature">
+                <h3>🌐 Interactive 3D Globe</h3>
+                <p>React Three Fiber powered Earth visualization with real-time data overlays</p>
+            </div>
+            <div class="feature">
+                <h3>🎤 Voice Interface</h3>
+                <p>Conversational AI personas for natural language spatial queries</p>
+            </div>
+        </div>
+        
+        <div class="cta-buttons">
+            <a href="http://localhost:3000" class="btn btn-primary" target="_blank">
+                🚀 Launch Full System
+            </a>
+            <a href="https://github.com/your-repo/eo-analysis" class="btn btn-secondary">
+                📚 Documentation
+            </a>
+        </div>
+        
+        <div class="legacy-note">
+            <strong>Legacy Globe:</strong> The original Three.js globe is still available. 
+            <a href="javascript:void(0)" onclick="showLegacyGlobe()" style="color: #fbbf24; text-decoration: underline;">
+                Click here to view
+            </a>
+        </div>
+    </div>
+
+    <!-- Legacy Three.js Globe (hidden by default) -->
+    <div id="legacy-globe" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1000;">
+        <div style="position: absolute; top: 20px; right: 20px; z-index: 1001;">
+            <button onclick="hideLegacyGlobe()" style="background: #ef4444; color: white; border: none; padding: 0.5rem 1rem; border-radius: 0.25rem; cursor: pointer;">
+                ✕ Close Legacy Globe
+            </button>
+        </div>
+        <canvas id="legacy-canvas"></canvas>
+    </div>
+
+    <script>
+        function showLegacyGlobe() {
+            document.getElementById('legacy-globe').style.display = 'block';
+            loadLegacyGlobe();
+        }
+        
+        function hideLegacyGlobe() {
+            document.getElementById('legacy-globe').style.display = 'none';
+        }
+        
+        function loadLegacyGlobe() {
+            // Load Three.js and create the legacy globe
+            if (!window.THREE) {
+                const script1 = document.createElement('script');
+                script1.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
+                script1.onload = () => {
+                    const script2 = document.createElement('script');
+                    script2.src = 'https://threejs.org/examples/js/controls/OrbitControls.js';
+                    script2.onload = () => {
+                        const script3 = document.createElement('script');
+                        script3.src = 'app.js';
+                        document.head.appendChild(script3);
+                    };
+                    document.head.appendChild(script2);
+                };
+                document.head.appendChild(script1);
+            }
+        }
+    </script>
+</body>
+</html>

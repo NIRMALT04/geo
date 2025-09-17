@@ -1,0 +1,181 @@
+version: '3.8'
+
+services:
+  # MongoDB for geospatial data storage
+  mongodb:
+    image: mongo:7.0
+    container_name: eo-mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:-eo_admin_password}
+      MONGO_INITDB_DATABASE: eo_analysis
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+      - ./config/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    networks:
+      - eo-network
+
+  # Redis for caching and session management
+  redis:
+    image: redis:7.2-alpine
+    container_name: eo-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-eo_redis_password}
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - eo-network
+
+  # Backend API service
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: eo-backend
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 8000
+      MONGODB_URI: mongodb://admin:${MONGO_PASSWORD:-eo_admin_password}@mongodb:27017/eo_analysis?authSource=admin
+      REDIS_URL: redis://:${REDIS_PASSWORD:-eo_redis_password}@redis:6379
+      JWT_SECRET: ${JWT_SECRET:-your_jwt_secret_here}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      VAPI_API_KEY: ${VAPI_API_KEY}
+      ISRO_API_KEY: ${ISRO_API_KEY}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_S3_BUCKET: ${AWS_S3_BUCKET:-eo-analysis-data}
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+      - ./ai-models/models:/app/models
+      - ./logs:/app/logs
+    depends_on:
+      - mongodb
+      - redis
+    networks:
+      - eo-network
+
+  # Frontend application
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: eo-frontend
+    restart: unless-stopped
+    environment:
+      VITE_API_BASE_URL: http://localhost:8000/api
+      VITE_WS_URL: ws://localhost:8000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - eo-network
+
+  # AI model service (GPU-enabled)
+  ai-service:
+    build:
+      context: ./ai-models
+      dockerfile: Dockerfile
+    container_name: eo-ai-service
+    restart: unless-stopped
+    environment:
+      CUDA_VISIBLE_DEVICES: 0
+      PYTORCH_CUDA_ALLOC_CONF: max_split_size_mb:512
+      MODEL_CACHE_DIR: /app/models
+      HF_HOME: /app/cache
+    volumes:
+      - ./ai-models/models:/app/models
+      - ./ai-models/cache:/app/cache
+      - ./data:/app/data
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    networks:
+      - eo-network
+
+  # Data processing service
+  data-processor:
+    build:
+      context: ./data-processing
+      dockerfile: Dockerfile
+    container_name: eo-data-processor
+    restart: unless-stopped
+    environment:
+      ISRO_API_KEY: ${ISRO_API_KEY}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      DATA_PATH: /app/data
+    volumes:
+      - ./data:/app/data
+      - ./data-processing/configs:/app/configs
+    networks:
+      - eo-network
+
+  # Nginx reverse proxy
+  nginx:
+    image: nginx:alpine
+    container_name: eo-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./docker/nginx/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - eo-network
+
+  # Monitoring with Grafana and Prometheus
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: eo-prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    networks:
+      - eo-network
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: eo-grafana
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}
+    ports:
+      - "3001:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./docker/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./docker/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+    depends_on:
+      - prometheus
+    networks:
+      - eo-network
+
+volumes:
+  mongodb_data:
+  redis_data:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  eo-network:
+    driver: bridge
